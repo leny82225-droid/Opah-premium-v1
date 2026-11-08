@@ -1,5 +1,5 @@
 -- ====================================================================
--- SCRIPT BERMALAM BERSAMA OPAH (ADVANCED UTILITY V2)
+-- SCRIPT BERMALAM BERSAMA OPAH (ADVANCED UTILITY V2 - FIXED)
 -- Fitur: ESP Kunci, ESP Kode Kertas, TP Kunci, TP Lock_1 & Auto-Collect
 -- ====================================================================
 
@@ -69,7 +69,7 @@ local function aktifkanESP()
 end
 
 -- ==========================================
--- 2. FITUR TELEPORTASI KUNCI (DEKAT & JAUH)
+-- 2. FITUR TELEPORTASI KUNCI (DEKAT & JAUH - FIXED)
 -- ==========================================
 local function tpKeKunci(cariTerdekat)
     local karakter = LocalPlayer.Character
@@ -84,6 +84,7 @@ local function tpKeKunci(cariTerdekat)
     
     for _, item in pairs(puzzleItems:GetChildren()) do
         if item.Name == "Key" then
+            -- Deteksi posisi objek tanpa terhambat pengecekan tipe Model
             local partKunci = item:IsA("BasePart") and item or item:FindFirstChildWhichIsA("BasePart")
             if partKunci then
                 local jarak = (hrpPos - partKunci.Position).Magnitude
@@ -114,19 +115,16 @@ local function autoCollectKunci()
     local puzzleItems = Workspace:FindFirstChild("PuzzleItems")
     if not puzzleItems then return end
     
-    local counter = 0
     for _, item in pairs(puzzleItems:GetChildren()) do
         if item.Name == "Key" then
-            -- Cari pemicu klik interaksi di dalam objek Kunci
+            -- Memicu interaksi klik jarak jauh pada tombol puzzle kunci
             local clickDetector = item:FindFirstChild("PuzzleClick") or item:FindFirstChildWhichIsA("ClickDetector") or item:FindFirstChildWhichIsA("ProximityPrompt")
             
             if clickDetector then
                 if clickDetector:IsA("ClickDetector") then
                     fireclickdetector(clickDetector)
-                    counter = counter + 1
                 elseif clickDetector:IsA("ProximityPrompt") then
                     fireproximityprompt(clickDetector)
-                    counter = counter + 1
                 end
             end
         end
@@ -156,7 +154,7 @@ end
 -- ==========================================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "OpahHelperGUI"
-ScreenGui.ResetOnSpawn = false -- GUI tetap ada walau mati ditangkap Opah
+ScreenGui.ResetOnSpawn = false -- GUI tidak hilang walau karakter reset/mati
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local Frame = Instance.new("Frame")
@@ -177,7 +175,6 @@ Title.Font = Enum.Font.SourceSansBold
 Title.TextSize = 16
 Title.Parent = Frame
 
--- Tombol 1: Aktifkan ESP
 local btnESP = Instance.new("TextButton")
 btnESP.Size = UDim2.new(0.9, 0, 0, 30)
 btnESP.Position = UDim2.new(0.05, 0, 0.18, 0)
@@ -185,16 +182,14 @@ btnESP.Text = "Aktifkan ESP (Kunci/Kode)"
 btnESP.Parent = Frame
 btnESP.MouseButton1Click:Connect(aktifkanESP)
 
--- Tombol 2: Auto Collect Kunci (Fitur Baru)
 local btnCollect = Instance.new("TextButton")
 btnCollect.Size = UDim2.new(0.9, 0, 0, 30)
 btnCollect.Position = UDim2.new(0.05, 0, 0.34, 0)
 btnCollect.Text = "⚡ Ambil Semua Kunci (Auto)"
-btnCollect.BackgroundColor3 = Color3.fromRGB(139, 0, 0) -- Ditandai warna merah/khusus
+btnCollect.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
 btnCollect.Parent = Frame
 btnCollect.MouseButton1Click:Connect(autoCollectKunci)
 
--- Tombol 3: TP Kunci Dekat
 local btnTPDekat = Instance.new("TextButton")
 btnTPDekat.Size = UDim2.new(0.9, 0, 0, 30)
 btnTPDekat.Position = UDim2.new(0.05, 0, 0.50, 0)
@@ -202,7 +197,6 @@ btnTPDekat.Text = "TP Kunci Terdekat"
 btnTPDekat.Parent = Frame
 btnTPDekat.MouseButton1Click:Connect(function() tpKeKunci(true) end)
 
--- Tombol 4: TP Kunci Jauh
 local btnTPJauh = Instance.new("TextButton")
 btnTPJauh.Size = UDim2.new(0.9, 0, 0, 30)
 btnTPJauh.Position = UDim2.new(0.05, 0, 0.66, 0)
@@ -210,7 +204,6 @@ btnTPJauh.Text = "TP Kunci Terjauh"
 btnTPJauh.Parent = Frame
 btnTPJauh.MouseButton1Click:Connect(function() tpKeKunci(false) end)
 
--- Tombol 5: TP Lock_1
 local btnTPLock1 = Instance.new("TextButton")
 btnTPLock1.Size = UDim2.new(0.9, 0, 0, 30)
 btnTPLock1.Position = UDim2.new(0.05, 0, 0.82, 0)
@@ -218,7 +211,6 @@ btnTPLock1.Text = "TP Ke Tempat Lock 1"
 btnTPLock1.Parent = Frame
 btnTPLock1.MouseButton1Click:Connect(tpKeLock1)
 
--- Auto styling tema gelap dan teks putih
 for _, b in pairs(Frame:GetChildren()) do
     if b:IsA("TextButton") then
         if b.BackgroundColor3 == Color3.fromRGB(253, 253, 253) or b.BackgroundColor3 == Color3.fromRGB(0,0,0) then
@@ -229,8 +221,3 @@ for _, b in pairs(Frame:GetChildren()) do
         b.TextSize = 14
     end
 end
-```
-
-### Cara Penggunaan:
-1. Jalankan kode di atas lewat editor Delta Executor kamu.
-2. Gunakan tombol **"⚡ Ambil Semua Kunci (Auto)"** saat kamu ingin mengumpulkan kunci dari jarak jauh tanpa perlu berpindah tempat. Fitur ini memanfaatkan fungsi bawaan executor (`fireclickdetector` / `fireproximityprompt`) untuk meraih objek *PuzzleClick*.
